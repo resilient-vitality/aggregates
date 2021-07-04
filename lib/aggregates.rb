@@ -6,19 +6,19 @@ loader = Zeitwerk::Loader.for_gem
 loader.setup
 
 module Aggregates
-  def configure
+  def self.configure
     yield Configuration.instance
   end
 
-  def new_aggregate_id
+  def self.new_aggregate_id
     SecureRandom.uuid.to_s
   end
 
-  def execute_command(command)
+  def self.execute_command(command)
     CommandProcessor.instance.execute_command command
   end
 
-  def execute_commands(*commands)
+  def self.execute_commands(*commands)
     CommandProcessor.instance.execute_commands(*commands)
   end
 end

@@ -26,7 +26,7 @@ module Aggregates
       storage_backend.store_event event
     end
 
-    def push_event_through_processors(event)
+    def self.push_event_through_processors(event)
       Configuration.instance.event_processors.each do |event_processor|
         event_processor.process_command event
       end
