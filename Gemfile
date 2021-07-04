@@ -9,6 +9,9 @@ gem 'dry-struct'
 gem 'dry-validation'
 gem 'securerandom'
 
+# TODO: Find out how to make this optional
+gem 'dynamoid'
+
 group :code_quality do
   gem 'bundler-audit', '~> 0.7'
   gem 'git-lint', '~> 2.0'

@@ -21,4 +21,8 @@ module Aggregates
   def self.execute_commands(*commands)
     CommandDispatcher.instance.execute_commands(*commands)
   end
+
+  def self.audit(aggregate_id)
+    Auditor.new aggregate_id
+  end
 end

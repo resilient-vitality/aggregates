@@ -13,5 +13,9 @@ module Aggregates
     def load_events_by_aggregate_id(_aggregate_id)
       raise NotImplementedError
     end
+
+    def load_commands_by_aggregate_id(_aggregate_id)
+      raise NotImplementedError
+    end
   end
 end
