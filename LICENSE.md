@@ -1,4 +1,4 @@
-Copyright 2021 []().
+Copyright 2021 [Resilient Vitality](https://www.resilientvitality.com).
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
