@@ -9,7 +9,7 @@ module Aggregates
       @commands = []
     end
 
-    def store_command_command(command)
+    def store_command(command)
       @commands << command
     end
 
