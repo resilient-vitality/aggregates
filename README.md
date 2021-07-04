@@ -11,23 +11,27 @@
 
 ## Table of Contents
 
-  - [Features](#features)
-  - [Screencasts](#screencasts)
-  - [Requirements](#requirements)
-  - [Setup](#setup)
-  - [Usage](#usage)
-  - [Development](#development)
-  - [Tests](#tests)
-  - [Versioning](#versioning)
-  - [Code of Conduct](#code-of-conduct)
-  - [Contributions](#contributions)
-  - [License](#license)
-  - [History](#history)
-  - [Credits](#credits)
+- [Features](#features)
+- [Screencasts](#screencasts)
+- [Requirements](#requirements)
+- [Setup](#setup)
+- [Usage](#usage)
+- [Development](#development)
+- [Tests](#tests)
+- [Versioning](#versioning)
+- [Code of Conduct](#code-of-conduct)
+- [Contributions](#contributions)
+- [License](#license)
+- [History](#history)
+- [Credits](#credits)
 
 <!-- Tocer[finish]: Auto-generated, don't remove. -->
 
 ## Features
+
+- Pluggable Event / Command Storage Backend
+- Tools for Command Validation and Execution.
+- Opinioned structure for CQRS programming.
 
 ## Screencasts
 
@@ -94,5 +98,4 @@ Built with [Gemsmith](https://www.alchemists.io/projects/gemsmith).
 
 ## Credits
 
-Developed by [Zach Probst]() at
-[]().
+Developed by [Zach Probst](mailto:zprobst@resilientvitality.com) at [Resilient Vitality](www.resilientvitality.com).

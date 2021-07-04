@@ -15,10 +15,10 @@ module Aggregates
   end
 
   def self.execute_command(command)
-    CommandProcessor.instance.execute_command command
+    CommandDispatcher.instance.execute_command command
   end
 
   def self.execute_commands(*commands)
-    CommandProcessor.instance.execute_commands(*commands)
+    CommandDispatcher.instance.execute_commands(*commands)
   end
 end

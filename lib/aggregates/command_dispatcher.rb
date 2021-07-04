@@ -20,8 +20,18 @@ module Aggregates
 
     private
 
+    def validate(command)
+      case command.validate
+      in Failure(result)
+        result.errors.to_h
+      else
+        nil
+      end
+    end
+
     def validate!(command)
-      # TODO: Raise a validation error if the command is invalid.
+      errors = validate(command)
+      raise CommandValidationError, errors unless errors.nil?
     end
 
     def send_command_to_processors(command)
