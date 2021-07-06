@@ -1,12 +1,16 @@
 # frozen_string_literal: true
 
 module Aggregates
+  # MessageProcessor is a set of helper methods for routing messages
+  # to handlers defined at the class level for DomainMessages.
   module MessageProcessor
+    # Provides a single mapping of Message Classes to a list of handler
+    # blocks that should be executed when that type of message is received.
     module ClassMethods
       def on(*message_classes, &block)
         message_classes.each do |message_class|
-          message_mapping[message_class] ||= []
-          message_mapping[message_class] << block
+          handlers = message_mapping[message_class] ||= []
+          handlers.append block
         end
       end
 
@@ -26,7 +30,7 @@ module Aggregates
     def handle_message(message)
       search_class = message.class
 
-      while search_class != Message
+      while search_class != DomainMessage
         handlers = self.class.message_mapping[search_class]
         handlers&.each do |handler|
           instance_exec(message, &handler)

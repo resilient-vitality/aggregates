@@ -1,24 +1,24 @@
 # frozen_string_literal: true
 
-require "bundler/setup"
+require 'bundler/setup'
 Bundler.require :tools
 
-require "simplecov"
+require 'simplecov'
 SimpleCov.start { enable_coverage :branch }
 
-require "aggregates"
+require 'aggregates'
 
 GC.auto_compact = true
 GC.verify_compaction_references double_heap: true, toward: :empty
 
-Dir[File.join(__dir__, "support", "shared_contexts", "**/*.rb")].each { |path| require path }
+Dir[File.join(__dir__, 'support', 'shared_contexts', '**/*.rb')].each { |path| require path }
 
 RSpec.configure do |config|
   config.color = true
   config.disable_monkey_patching!
-  config.example_status_persistence_file_path = "./tmp/rspec-examples.txt"
+  config.example_status_persistence_file_path = './tmp/rspec-examples.txt'
   config.filter_run_when_matching :focus
-  config.formatter = ENV["CI"] == "true" ? :progress : :documentation
+  config.formatter = ENV['CI'] == 'true' ? :progress : :documentation
   config.order = :random
   config.shared_context_metadata_behavior = :apply_to_host_groups
   config.warnings = true

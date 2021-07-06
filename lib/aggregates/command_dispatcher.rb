@@ -9,6 +9,10 @@ module Aggregates
   class CommandDispatcher
     include Singleton
 
+    def initialize
+      @config = Configuration.instance
+    end
+
     # Takes a sequence of commands and executes them one at a time.
     def process_commands(*commands)
       commands.each do |command|
@@ -26,28 +30,14 @@ module Aggregates
 
     private
 
-    def validate(command)
-      case command.validate
-      in Failure(result)
-        result.errors.to_h
-      else
-        nil
-      end
-    end
-
-    def validate!(command)
-      errors = validate(command)
-      raise CommandValidationError, errors unless errors.nil?
-    end
-
     def send_command_to_processors(command)
-      Configuration.instance.command_processors do |command_processor|
+      @config.command_processors do |command_processor|
         command_processor.process_command command
       end
     end
 
     def store_command(command)
-      Configuration.instance.store_command command
+      @config.storage_backend.store_command command
     end
   end
 end

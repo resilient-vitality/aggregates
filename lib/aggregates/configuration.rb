@@ -3,6 +3,8 @@
 require 'singleton'
 
 module Aggregates
+  # Stores all of the items needed to dictate the exact behavior needed by
+  # the application consuming the Aggregates gem.
   class Configuration
     include Singleton
 
@@ -22,8 +24,8 @@ module Aggregates
       @event_processors << event_processor
     end
 
-    def process_commmands_with(command_procesor)
-      @command_processors << command_procesor
+    def process_commands_with(command_processor)
+      @command_processors << command_processor
     end
   end
 end

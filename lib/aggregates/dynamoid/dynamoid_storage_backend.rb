@@ -1,9 +1,13 @@
 # frozen_string_literal: true
 
+# rubocop:disable Style/Documentation
+
 module Aggregates
+  # rubocop:enable Style/Documentation
   begin
     require 'dynamoid'
 
+    # Extensions to the Aggregates gem that provide message storage on DynamoDB.
     module Dynamoid
       class DynamoEventStore
         include Dynamoid::Document
@@ -24,6 +28,7 @@ module Aggregates
         table name: :commands, hash_key: :aggregate_id, range_key: :created_at, timestamps: true
       end
 
+      # Stores messages on DynamoDB using the dynamoid gem.
       class DynamoidStorageBackend < StorageBackend
         def store_event(event)
           data = JSON.dump event.to_json

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module Aggregates
+  # The StorageBackend class is responsible for providing an interface for storing Domain messages
+  # such as events and commands.
   class StorageBackend
     def store_event(_event)
       raise NotImplementedError

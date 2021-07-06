@@ -5,6 +5,7 @@ require 'zeitwerk'
 loader = Zeitwerk::Loader.for_gem
 loader.setup
 
+# A helpful library for building CQRS and Event Sourced Applications.
 module Aggregates
   def self.configure
     yield Configuration.instance

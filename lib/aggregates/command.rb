@@ -13,10 +13,13 @@ module Aggregates
     class Contract < Dry::Validation::Contract
     end
 
-    # Takes the current state of the command and calls the contract
-    # supplied on it. Returns a monad with the validation results.
     def validate
-      Contract.new.call(attributes).to_monad
+      Contract.new.call(attributes).errors.to_h
+    end
+
+    def validate!
+      errors = validate
+      raise CommandValidationError, errors unless errors.length.zero?
     end
   end
 end
