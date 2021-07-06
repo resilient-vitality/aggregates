@@ -5,7 +5,7 @@
 # Aggregates
 
 [![Gem Version](https://badge.fury.io/rb/aggregates.svg)](http://badge.fury.io/rb/aggregates)
-[![Alchemists Style Guide](https://img.shields.io/badge/code_style-alchemists-brightgreen.svg)](https://www.alchemists.io/projects/code_quality)
+[![Ruby Style Guide](https://img.shields.io/badge/code_style-community-brightgreen.svg)](https://rubystyle.guide)
 
 <!-- Tocer[start]: Auto-generated, don't remove. -->
 
