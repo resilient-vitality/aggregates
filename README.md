@@ -11,19 +11,29 @@
 
 ## Table of Contents
 
-- [Features](#features)
-- [Screencasts](#screencasts)
-- [Requirements](#requirements)
-- [Setup](#setup)
-- [Usage](#usage)
-- [Development](#development)
-- [Tests](#tests)
-- [Versioning](#versioning)
-- [Code of Conduct](#code-of-conduct)
-- [Contributions](#contributions)
-- [License](#license)
-- [History](#history)
-- [Credits](#credits)
+  - [Features](#features)
+  - [Requirements](#requirements)
+  - [Setup](#setup)
+  - [Usage](#usage)
+    - [Defining AggregateRoots](#defining-aggregateroots)
+    - [Creating Commands](#creating-commands)
+    - [Creating Events](#creating-events)
+    - [Processing Commands](#processing-commands)
+    - [Processing Events](#processing-events)
+    - [Auditing Aggregates](#auditing-aggregates)
+    - [Configuring](#configuring)
+      - [Storage Backends](#storage-backends)
+        - [Dynamoid](#dynamoid)
+      - [Adding Command Processors](#adding-command-processors)
+      - [Adding Event Processors](#adding-event-processors)
+  - [Development](#development)
+  - [Tests](#tests)
+  - [Versioning](#versioning)
+  - [Code of Conduct](#code-of-conduct)
+  - [Contributions](#contributions)
+  - [License](#license)
+  - [History](#history)
+  - [Credits](#credits)
 
 <!-- Tocer[finish]: Auto-generated, don't remove. -->
 
@@ -124,10 +134,10 @@ end
 
 ```ruby
 aggregate_id = Aggregates.new_aggregate_id
-# ... Commands ands stuff happened.
-auditor = Aggregates.audit
+# ... Commands and stuff happened.
+auditor = Aggregates.audit aggregate_id
 
-# Each of these returns a list of events and commands.
+# Each of these returns a list to investigate using.
 events = auditor.events
 commands = auditor.commands
 ```
@@ -146,7 +156,7 @@ end
 ```
 ##### Dynamoid
 
-If aggregates can `require 'dynamoid'` then it will provide the `Aggregates::Dynamoid::DynamoidStorageBackend` that
+If `Aggregates` can `require 'dynamoid'` then it will provide the `Aggregates::Dynamoid::DynamoidStorageBackend` that
 stores using the [Dynmoid Gem](https://github.com/Dynamoid/dynamoid) for AWS DynamoDB.
 
 #### Adding Command Processors
