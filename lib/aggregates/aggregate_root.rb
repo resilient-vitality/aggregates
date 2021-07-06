@@ -27,10 +27,11 @@ module Aggregates
 
     # Creates a new instance of an aggregate root. This should not be called directly. Instead, it should
     # be called by calling AggregateRoot.get_by_id.
-    def initialize(id)
+    def initialize(id, mutable: true)
       super()
 
       @id = id
+      @mutable = mutable
       @sequence_number = 1
       @event_stream = EventStream.new id
     end
@@ -46,9 +47,21 @@ module Aggregates
     #   3.) Produces the event on the event stream so that is saved by the storage backend and processed
     #       by the configured processors of the given type.
     def apply(event, params = {})
+      raise FrozenError unless @mutable
+
       event = build_event(event, params)
       process_event event
       @event_stream.publish event
+    end
+
+    # Loads all events from the event stream of this instance and reprocesses them to
+    # get the current state of the aggregate.
+    def replay_history(up_to: nil)
+      events = @event_stream.load_events
+      events = event.select { |e| e.created_at <= up_to } if up_to.present?
+      events.each do |event|
+        process_event event
+      end
     end
 
     private
@@ -58,14 +71,6 @@ module Aggregates
     def build_event(event, params)
       default_args = { aggregate_id: @id, sequence_number: @sequence_number }
       event.new(params.merge(default_args))
-    end
-
-    # Loads all events from the event stream of this instance and reprocesses them to
-    # get the current state of the aggregate.
-    def replay_history
-      @event_stream.load_events.each do |event|
-        process_event event
-      end
     end
   end
 end

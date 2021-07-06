@@ -9,6 +9,9 @@ module Aggregates
   class DomainMessage < Dry::Struct
     attribute :aggregate_id, Types::String
     attribute :message_id, Types::String
+    attribute :created_at, Types::Strict::DateTime.default do
+      Time.now
+    end
 
     def to_json(*args)
       json_data = attributes.merge({ JSON.create_id => self.class.name })

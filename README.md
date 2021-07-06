@@ -148,11 +148,15 @@ Aggregates.execute_commands increment, toggle
 ```ruby
 aggregate_id = Aggregates.new_aggregate_id
 # ... Commands and stuff happened.
-auditor = Aggregates.audit aggregate_id
+auditor = Aggregates.audit MyAggregateType aggregate_id
 
 # Each of these returns a list to investigate using.
-events = auditor.events
-commands = auditor.commands
+events = auditor.events # Or events_processed_by(time) or events_processed_after(time)
+commands = auditor.commands # Or commands_processed_by(time) or commands_processed_after(time)
+
+# Or....
+# View the state of an aggregate at a certain pont in time.
+aggregate_at_time = auditor.inspect_state_at(Time.now - 1.hour)
 ```
 
 ### Configuring 

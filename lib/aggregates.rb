@@ -23,7 +23,7 @@ module Aggregates
     CommandDispatcher.instance.execute_commands(*commands)
   end
 
-  def self.audit(aggregate_id)
-    Auditor.new aggregate_id
+  def self.audit(type, aggregate_id)
+    Auditor.new type, aggregate_id
   end
 end
