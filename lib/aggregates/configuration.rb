@@ -11,7 +11,7 @@ module Aggregates
     def initialize
       @command_processors = []
       @event_processors = []
-      @storage_backend = nil
+      @storage_backend = InMemoryStorageBackend.new
     end
 
     def store_with(storage_backend)
