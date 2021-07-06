@@ -20,6 +20,7 @@
     - [Creating Events](#creating-events)
     - [Processing Commands](#processing-commands)
     - [Processing Events](#processing-events)
+    - [Executing Commands](#executing-commands)
     - [Auditing Aggregates](#auditing-aggregates)
     - [Configuring](#configuring)
       - [Storage Backends](#storage-backends)
@@ -128,6 +129,18 @@ class RssUpdateProcessor < Aggregates::EventProcessor
     update_feed_for_new_post(event)
   end
 end
+```
+
+### Executing Commands
+
+```ruby
+aggregate_id = Aggregates.new_aggregate_id
+command = CreateThing.new(foo: 1, bar: false, aggregate_id: aggregate_id)
+Aggregates.execute_command command
+
+increment = IncrementFooThing.new(aggregate_id: aggregate_id)
+toggle = ToggleBarThing.new(aggregate_id: aggregate_id)
+Aggregates.execute_commands increment, toggle
 ```
 
 ### Auditing Aggregates
