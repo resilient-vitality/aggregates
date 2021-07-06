@@ -23,7 +23,7 @@ module Aggregates
     # Takes a single command and processes it. The command will be validated through it's contract, sent to command
     # processors and finally stored with the configured StorageBackend used for messages.
     def process_command(command)
-      validate! command
+      command.validate!
       send_command_to_processors command
       store_command command
     end
