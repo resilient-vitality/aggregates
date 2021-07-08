@@ -17,7 +17,7 @@ module Aggregates
 
     def publish(event)
       @config.event_processors.each do |event_processor|
-        event_processor.process_command event
+        event_processor.process_event event
       end
       @config.storage_backend.store_event event
     end

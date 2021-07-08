@@ -19,5 +19,15 @@ module Aggregates
     def load_commands_by_aggregate_id(_aggregate_id)
       raise NotImplementedError
     end
+
+    protected
+
+    def message_to_json_string(message)
+      JSON.dump message.to_json
+    end
+
+    def json_string_to_message(json_string)
+      JSON.parse json_string, create_additions: true
+    end
   end
 end

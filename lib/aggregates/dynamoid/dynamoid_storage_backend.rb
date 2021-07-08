@@ -10,7 +10,7 @@ module Aggregates
     # Extensions to the Aggregates gem that provide message storage on DynamoDB.
     module Dynamoid
       class DynamoEventStore
-        include Dynamoid::Document
+        include ::Dynamoid::Document
 
         field :aggregate_id
         field :sequence_number, :integer
@@ -20,7 +20,7 @@ module Aggregates
       end
 
       class DynamoCommandStore
-        include Dynamoid::Document
+        include ::Dynamoid::Document
 
         field :aggregate_id
         field :data
@@ -31,14 +31,14 @@ module Aggregates
       # Stores messages on DynamoDB using the dynamoid gem.
       class DynamoidStorageBackend < StorageBackend
         def store_event(event)
-          data = JSON.dump event.to_json
+          data = message_to_json_string(event)
           args = { aggregate_id: event.aggregate_id, sequence_number: event.sequence_number, data: data }
           event = DynamoEventStore.new args
           event.save!
         end
 
         def store_command(command)
-          data = JSON.dump command.to_json
+          data = message_to_json_string(command)
           args = { aggregate_id: command.aggregate_id, data: data }
           command = DynamoCommandStore.new args
           command.save!
@@ -46,15 +46,13 @@ module Aggregates
 
         def load_events_by_aggregate_id(aggregate_id)
           DynamoEventStore.where(aggregate_id: aggregate_id).all.map do |stored_event|
-            json = stored_event.data
-            JSON.parse json, create_additions: true
+            json_string_to_message stored_event.data
           end
         end
 
         def load_commands_by_aggregate_id(aggregate_id)
           DynamoCommandStore.where(aggregate_id: aggregate_id).all.map do |stored_command|
-            json = stored_command.data
-            JSON.parse json, create_additions: true
+            json_string_to_message stored_command.data
           end
         end
       end

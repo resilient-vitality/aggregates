@@ -21,7 +21,7 @@ module Aggregates
     # Returns a new instance of an aggregate by loading and reprocessing all events for that aggregate.
     def self.get_by_id(id)
       instance = new id
-      instance.send(:replay_history)
+      instance.replay_history
       instance
     end
 
