@@ -24,4 +24,9 @@ Gem::Specification.new do |spec|
   spec.files = Dir['lib/**/*']
   spec.extra_rdoc_files = Dir['README*', 'LICENSE*']
   spec.require_paths = ['lib']
+
+  spec.add_dependency 'dry-monads'
+  spec.add_dependency 'dry-struct'
+  spec.add_dependency 'dry-validation'
+  spec.add_dependency 'securerandom'
 end
