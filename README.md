@@ -88,9 +88,7 @@ class PublishPost < Aggregates::Command
   # Reference: https://dry-rb.org/gems/dry-validation/1.6/
   class Contract < Contract
     rule(:body) do
-      unless value.length > 10
-        key.failure('Post not long enough')
-      end
+      key.failure('Post not long enough') unless value.length > 10
     end
   end
 end
@@ -100,8 +98,8 @@ end
 
 ```ruby
 class PublishPost < Aggregates::Command
-  attribute body, Types::String
-  attribute category, Type::String
+  attribute :body, Types::String
+  attribute :category, Type::String
 end
 ```
 
@@ -116,6 +114,40 @@ class PostCommandProcessor < Aggregates::CommandProcessor
   end
 end
 ```
+
+### Filtering Commands
+There are times where commands should not be executed by the command logic. You can opt to include a 
+condition in your command processor. However, that is not always extensible if you have repeat logic. Additionally,
+depending on the complexity of your authorization logic, it can become hard to test. To support adding this filtering 
+logic, Aggregates supports `CommandFilters` to provide a simple API for filtering commands prior to a command processor 
+being called. 
+
+```ruby
+class UpdatePostCommand < Aggregates::Commands
+  attribute :commanding_user_id, Types::String
+end
+
+class UpdatePostBody < UpdatePostCommand
+  attribute :body, Types::String
+end
+
+class PostCommandFilter < Aggregates::CommandFilter
+  on UpdatePostCommand do |command|
+    with_aggregate(Post, command) do |post|
+      post.owner_id == command.commanding_user_id
+    end
+  end
+end
+```
+
+In this example, we are using a super class of `UpdatePostBody`.
+As with all MessageProcessors, calling `on` with a super class
+will be called when any child class is being processed. In other words,
+`on UpdatePostCommand` will be called when you call `Aggregates.execute_command` 
+with an instance of `UpdatePostBody`.
+
+Calling `with_aggregate` in both the `CommandProcessor` and the `CommandFilter` is 
+
 
 ### Processing Events
 
@@ -191,6 +223,14 @@ end
 Aggregates.configure do |config|
   # May call this method many times with different processors.
   config.process_events_with RssUpdateProcessor.new
+end
+```
+
+#### Adding Command Filters
+
+```ruby
+Aggregates.configure do |config|
+  config.filter_commands_with MyCommandFilter.new
 end
 ```
 
