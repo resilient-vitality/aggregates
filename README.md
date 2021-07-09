@@ -15,40 +15,40 @@ _Warning:_ This Gem is in active development and probably doesn't work correctly
 
 ## Table of Contents
 
-- [Features](#features)
-- [Requirements](#requirements)
-- [Setup](#setup)
-- [Usage](#usage)
-  - [Defining AggregateRoots](#defining-aggregateroots)
-  - [Creating Commands](#creating-commands)
-  - [Creating Events](#creating-events)
-  - [Processing Commands](#processing-commands)
-  - [Filtering Commands](#filtering-commands)
-  - [Processing Events](#processing-events)
-  - [Executing Commands](#executing-commands)
-  - [Auditing Aggregates](#auditing-aggregates)
-  - [Configuring](#configuring)
-    - [Storage Backends](#storage-backends)
-      - [Dynamoid](#dynamoid)
-    - [Adding Command Processors](#adding-command-processors)
-    - [Adding Event Processors](#adding-event-processors)
-    - [Adding Command Filters](#adding-command-filters)
-- [Development](#development)
-- [Tests](#tests)
-- [Versioning](#versioning)
-- [Code of Conduct](#code-of-conduct)
-- [Contributions](#contributions)
-- [License](#license)
-- [History](#history)
-- [Credits](#credits)
+  - [Features](#features)
+  - [Requirements](#requirements)
+  - [Setup](#setup)
+  - [Usage](#usage)
+    - [Defining AggregateRoots](#defining-aggregateroots)
+    - [Creating Commands](#creating-commands)
+    - [Creating Events](#creating-events)
+    - [Processing Commands](#processing-commands)
+    - [Filtering Commands](#filtering-commands)
+    - [Processing Events](#processing-events)
+    - [Executing Commands](#executing-commands)
+    - [Auditing Aggregates](#auditing-aggregates)
+    - [Configuring](#configuring)
+      - [Storage Backends](#storage-backends)
+        - [Dynamoid](#dynamoid)
+      - [Adding Command Processors](#adding-command-processors)
+      - [Adding Event Processors](#adding-event-processors)
+      - [Adding Command Filters](#adding-command-filters)
+  - [Development](#development)
+  - [Tests](#tests)
+  - [Versioning](#versioning)
+  - [Code of Conduct](#code-of-conduct)
+  - [Contributions](#contributions)
+  - [License](#license)
+  - [History](#history)
+  - [Credits](#credits)
 
 <!-- Tocer[finish]: Auto-generated, don't remove. -->
 
 ## Features
 
-- Pluggable Event / Command Storage Backend
-- Tools for Command Validation and Execution.
-- Opinioned structure for CQRS programming.
+- Pluggable Event / Command Storage Backends
+- Tools for Command Validation, Filtering, and Execution.
+- Opinioned structure for CQRS, Domain-Driven Design, and Event Sourcing.
 
 ## Requirements
 
@@ -68,22 +68,22 @@ Or Add the following to your Gemfile:
 
 ### Defining AggregateRoots
 
-An AggregateRoot is a central grouping of domain object(s) that work to encapsulate
-parts of your Domain or Business Logic. The general design of aggregate roots should be as follows:
+An AggregateRoot is a grouping of domain object(s) that work to encapsulate
+a single part of your Domain or Business Logic. The general design of aggregate roots should be as follows:
 
-- Create functions that encapsulate different changes in your Aggregate Roots. These functions should enforce buisiness logic constraints and then capture state changes by creating events.
+- Create functions that encapsulate different operations on your Aggregate Roots. These functions should enforce buisiness logic constraints and then capture state changes by creating events.
 - Create event handlers that actually perform the state changes captured by those events.
 
 A simple example is below:
 
 ```ruby
 class Post < Aggregates::AggregateRoot
-  # Write functions that encapsulate business logic that comes from command.
+  # Write functions that encapsulate business logic.
   def publish(command)
     apply EventPublished, body: command.body, category: command.category
   end
 
-  # Before the event is processed, perform modifications to the aggregate.
+  # Modify the state of the aggregate from the emitted events.
   on EventPublished do |event|
     @body = event.body
     @category = event.category
@@ -91,14 +91,17 @@ class Post < Aggregates::AggregateRoot
 end
 ```
 
+_Note:_ the message-handling DSL (`on`) supports passing a super class of any given event
+as well. Every `on` block that applies to the event will be called in order from most specific to least specific.
+
 ### Creating Commands
 
-Commands are a type of domain message that define the shape and contract of data needed to perform an action. Essentially, they provide the api for interacting with your domain. Commands should have descriptive names capturing the change they are intended to make to the domain. For instance, `ChangeUserEmail` or `AddComment`.
+Commands are a type of domain message that define the shape and contract of data needed to perform an action. Essentially, they provide the api for interacting with your domain. Commands should have descriptive names capturing the change they are intended to make. For instance, `ChangeUserEmail` or `AddComment`.
 
 ```ruby
 class PublishPost < Aggregates::Command
-  attribute body, Types::String
-  attribute category, Type::String
+  attribute :body, Types::String
+  attribute :category, Types::String
 
   # Input Validation Handled via dry-validation.
   # Reference: https://dry-rb.org/gems/dry-validation/1.6/
@@ -119,17 +122,16 @@ For instance, if the user's email has changed, then you might create an event ty
 ```ruby
 class PublishPost < Aggregates::Command
   attribute :body, Types::String
-  attribute :category, Type::String
+  attribute :category, Types::String
 end
 ```
 
 ### Processing Commands
 
 The goal of a `CommandProcessor` is to route commands that have passed validation and
-filtering and invoke business logic on their respective aggregates. Doing so is accomplished
-by using the same Message handling DSL as in our `AggregateRoots`, this time for commands.
+filtering. They should invoke business logic on their respective aggregates. Doing so is accomplished by using the same message-handling DSL as in our `AggregateRoots`, this time for commands.
 
-We also provide a helper function `with_aggregate` that helps rerieve the appropriate aggregate
+A helper function, `with_aggregate`, is provided to help retrieve the appropriate aggregate
 for a given command.
 
 ```ruby
@@ -142,9 +144,14 @@ class PostCommandProcessor < Aggregates::CommandProcessor
 end
 ```
 
+_Note:_ the message-handling DSL (`on`) supports passing a super class of any given event
+as well. Every `on` block that applies to the event will be called in order from most specific to least specific.
+
 ### Filtering Commands
 
-There are times where commands should not be executed by the command logic. You can opt to include a condition in your command processor. However, that is not always extensible if you have repeat logic. Additionally, depending on the complexity of your authorization logic, it can become hard to test. To support adding this filtering logic, Aggregates supports `CommandFilters` to provide a simple API for filtering commands prior to a command processor being called.
+There are times where commands should not be executed by the domain logic. You can opt to include a condition in your command processor or aggregate. However, that is not always extensible if you have repeated logic between many commands. Additionally, it violates the single responsiblity principal.
+
+Instead, it is best to support this kind of filtering logic using `CommandFilters`. A `CommandFilter` uses the same Message Handling message-handling DSL as the rest of the `Aggregates` gem. This time, it needs to return a true/false back to the gem to determine whether or not (true/false) the command should be allowed. Many command filters can provide many blocks of the `on` DSL. If any one of the filters rejects the command then the command will not be procesed.
 
 ```ruby
 class UpdatePostCommand < Aggregates::Command
@@ -172,9 +179,15 @@ with an instance of `UpdatePostBody`.
 
 ### Processing Events
 
+Event processors are responsible for responding to events and effecting changes on things
+that are not the aggregates themselves. Here is where the read side of your CQRS model can take
+place. Since `Aggregates` does not enforce a storage solution for any component of the application, you will likely want to provide a helper mechanism for updating projections of aggregates into your read model.
+
+Additionally, the `EventProcessor` type can be used to perform other side effects in other systems. Examples could include sending an email to welcome a user, publish the event to a webhook for a subscribing micro service, or much more.
+
 ```ruby
 class RssUpdateProcessor < Aggregates::EventProcessor
-  def update_feed_for_new_post
+  def update_feed_for_new_post(event)
     # ...
   end
 
@@ -183,6 +196,9 @@ class RssUpdateProcessor < Aggregates::EventProcessor
   end
 end
 ```
+
+_Note:_ the message-handling DSL (`on`) supports passing a super class of any given event
+as well. Every `on` block that applies to the event will be called in order from most specific to least specific.
 
 ### Executing Commands
 

@@ -9,6 +9,7 @@ module Aggregates
 
     # Extensions to the Aggregates gem that provide message storage on DynamoDB.
     module Dynamoid
+      # Stores events in DynamoDB using `Dynamoid`
       class DynamoEventStore
         include ::Dynamoid::Document
 
@@ -17,8 +18,15 @@ module Aggregates
         field :data
 
         table name: :events, hash_key: :aggregate_id, range_key: :sequence_number, timestamps: true
+
+        def self.store!(event, data)
+          args = { aggregate_id: event.aggregate_id, sequence_number: event.sequence_number, data: data }
+          event = new args
+          event.save!
+        end
       end
 
+      # Stores commands in DynamoDB using `Dynamoid`
       class DynamoCommandStore
         include ::Dynamoid::Document
 
@@ -26,22 +34,24 @@ module Aggregates
         field :data
 
         table name: :commands, hash_key: :aggregate_id, range_key: :created_at, timestamps: true
+
+        def self.store!(command, data)
+          args = { aggregate_id: command.aggregate_id, data: data }
+          command = new args
+          command.save!
+        end
       end
 
       # Stores messages on DynamoDB using the dynamoid gem.
       class DynamoidStorageBackend < StorageBackend
         def store_event(event)
           data = message_to_json_string(event)
-          args = { aggregate_id: event.aggregate_id, sequence_number: event.sequence_number, data: data }
-          event = DynamoEventStore.new args
-          event.save!
+          DynamoEventStore.store! event, data
         end
 
         def store_command(command)
           data = message_to_json_string(command)
-          args = { aggregate_id: command.aggregate_id, data: data }
-          command = DynamoCommandStore.new args
-          command.save!
+          DynamoCommandStore.store! command, data
         end
 
         def load_events_by_aggregate_id(aggregate_id)

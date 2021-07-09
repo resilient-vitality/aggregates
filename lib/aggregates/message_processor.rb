@@ -27,19 +27,19 @@ module Aggregates
       host_class.extend(ClassMethods)
     end
 
-    def handle_message(message)
+    def find_message_handlers(message, &block)
       search_class = message.class
-      results = []
-
       while search_class != DomainMessage
         handlers = self.class.message_mapping[search_class]
-        handlers&.each do |handler|
-          results << instance_exec(message, &handler)
-        end
+        handlers&.each(&block)
         search_class = search_class.superclass
       end
+    end
 
-      results
+    def handle_message(message)
+      find_message_handlers.map do |handler|
+        instance_exec(message, &handler)
+      end
     end
   end
 end

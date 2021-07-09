@@ -23,11 +23,11 @@ module Aggregates
     # Takes a single command and processes it. The command will be validated through it's contract, sent to command
     # processors and finally stored with the configured StorageBackend used for messages.
     def process_command(command)
+      command.validate!
       return unless should_process? command
 
-      command.validate!
-      send_command_to_processors command
-      store_command command
+      send_to_processors command
+      store command
     end
 
     private
@@ -40,13 +40,13 @@ module Aggregates
       end
     end
 
-    def send_command_to_processors(command)
+    def send_to_processors(command)
       @config.command_processors.each do |command_processor|
         command_processor.process_command command
       end
     end
 
-    def store_command(command)
+    def store(command)
       @config.storage_backend.store_command command
     end
   end

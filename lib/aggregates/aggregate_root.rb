@@ -22,6 +22,7 @@ module Aggregates
 
     # Creates a new instance of an aggregate root. This should not be called directly. Instead, it should
     # be called by calling AggregateRoot.get_by_id.
+    # :reek:BooleanParameter
     def initialize(id, mutable: true)
       super()
 
@@ -53,7 +54,7 @@ module Aggregates
     # get the current state of the aggregate.
     def replay_history(up_to: nil)
       events = @event_stream.load_events
-      events = event.select { |e| e.created_at <= up_to } if up_to.present?
+      events = events.select { |event| event.created_at <= up_to } if up_to.present?
       events.each do |event|
         process_event event
       end
