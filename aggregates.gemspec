@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.platform = Gem::Platform::RUBY
   spec.authors = ['Zach Probst']
   spec.email = ['zprobst@resilientvitality.com']
-  spec.homepage = 'https://github.com//aggregates'
-  spec.summary = ''
+  spec.homepage = 'https://github.com/resilient-vitality/aggregates'
+  spec.summary = 'A ruby gem for writing CQRS applications'
   spec.license = 'MIT'
 
   spec.metadata = {
@@ -28,4 +28,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'dry-struct'
   spec.add_dependency 'dry-validation'
   spec.add_dependency 'securerandom'
+  spec.add_dependency 'zeitwerk'
 end

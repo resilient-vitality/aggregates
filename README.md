@@ -4,6 +4,8 @@
 
 # Aggregates
 
+A ruby gem for writing CQRS applications with pluggable components.
+
 [![Gem Version](https://badge.fury.io/rb/aggregates.svg)](http://badge.fury.io/rb/aggregates)
 [![Ruby Style Guide](https://img.shields.io/badge/code_style-community-brightgreen.svg)](https://rubystyle.guide)
 
@@ -11,32 +13,32 @@
 
 ## Table of Contents
 
-  - [Features](#features)
-  - [Requirements](#requirements)
-  - [Setup](#setup)
-  - [Usage](#usage)
-    - [Defining AggregateRoots](#defining-aggregateroots)
-    - [Creating Commands](#creating-commands)
-    - [Creating Events](#creating-events)
-    - [Processing Commands](#processing-commands)
-    - [Filtering Commands](#filtering-commands)
-    - [Processing Events](#processing-events)
-    - [Executing Commands](#executing-commands)
-    - [Auditing Aggregates](#auditing-aggregates)
-    - [Configuring](#configuring)
-      - [Storage Backends](#storage-backends)
-        - [Dynamoid](#dynamoid)
-      - [Adding Command Processors](#adding-command-processors)
-      - [Adding Event Processors](#adding-event-processors)
-      - [Adding Command Filters](#adding-command-filters)
-  - [Development](#development)
-  - [Tests](#tests)
-  - [Versioning](#versioning)
-  - [Code of Conduct](#code-of-conduct)
-  - [Contributions](#contributions)
-  - [License](#license)
-  - [History](#history)
-  - [Credits](#credits)
+- [Features](#features)
+- [Requirements](#requirements)
+- [Setup](#setup)
+- [Usage](#usage)
+  - [Defining AggregateRoots](#defining-aggregateroots)
+  - [Creating Commands](#creating-commands)
+  - [Creating Events](#creating-events)
+  - [Processing Commands](#processing-commands)
+  - [Filtering Commands](#filtering-commands)
+  - [Processing Events](#processing-events)
+  - [Executing Commands](#executing-commands)
+  - [Auditing Aggregates](#auditing-aggregates)
+  - [Configuring](#configuring)
+    - [Storage Backends](#storage-backends)
+      - [Dynamoid](#dynamoid)
+    - [Adding Command Processors](#adding-command-processors)
+    - [Adding Event Processors](#adding-event-processors)
+    - [Adding Command Filters](#adding-command-filters)
+- [Development](#development)
+- [Tests](#tests)
+- [Versioning](#versioning)
+- [Code of Conduct](#code-of-conduct)
+- [Contributions](#contributions)
+- [License](#license)
+- [History](#history)
+- [Credits](#credits)
 
 <!-- Tocer[finish]: Auto-generated, don't remove. -->
 
@@ -126,7 +128,7 @@ logic, Aggregates supports `CommandFilters` to provide a simple API for filterin
 being called.
 
 ```ruby
-class UpdatePostCommand < Aggregates::Commands
+class UpdatePostCommand < Aggregates::Command
   attribute :commanding_user_id, Types::String
 end
 
@@ -239,7 +241,7 @@ end
 
 To contribute, run:
 
-    git clone https://github.com//aggregates.git
+    git clone https://github.com/resilient-vitality/aggregates.git
     cd aggregates
     bin/setup
 
