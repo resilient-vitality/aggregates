@@ -11,6 +11,7 @@ describe Aggregates::InMemoryStorageBackend do
 
   context 'When adding new commands to the store' do
     it 'is stored for later retrieval' do
+      pending 'Not implemented'
     end
   end
 end

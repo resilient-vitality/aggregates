@@ -8,12 +8,18 @@ module Aggregates
   class Configuration
     include Singleton
 
-    attr_reader :command_processors, :event_processors, :storage_backend
+    attr_reader :command_processors, :event_processors,
+                :storage_backend, :command_filters
 
     def initialize
       @command_processors = []
       @event_processors = []
+      @command_filters = []
       @storage_backend = InMemoryStorageBackend.new
+    end
+
+    def filter_commands_with(command_filter)
+      @command_filters << command_filter
     end
 
     def store_with(storage_backend)

@@ -11,7 +11,7 @@ module Aggregates
       end
 
       def with_aggregate_by_id(type, aggregate_id)
-        yield type.find_by_id aggregate_id
+        yield type.get_by_id aggregate_id
       end
     end
 

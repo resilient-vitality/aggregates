@@ -8,10 +8,8 @@ module Aggregates
   # (Event and Command) both require.
   class DomainMessage < Dry::Struct
     attribute :aggregate_id, Types::String
-    attribute :message_id, Types::String
-    attribute :created_at, Types::Strict::DateTime.default do
-      Time.now
-    end
+    attribute :message_id, Types::String.default { Aggregates.new_message_id }
+    attribute :created_at, Types::Strict::DateTime.default { Time.now }
 
     def to_json(*args)
       json_data = attributes.merge({ JSON.create_id => self.class.name })

@@ -4,6 +4,6 @@ require 'dry-struct'
 
 module Aggregates
   module Types
-    Include Dry.types
+    include Dry.Types
   end
 end

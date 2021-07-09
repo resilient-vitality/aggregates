@@ -15,6 +15,10 @@ module Aggregates
     SecureRandom.uuid.to_s
   end
 
+  def self.new_message_id
+    SecureRandom.uuid.to_s
+  end
+
   def self.execute_command(command)
     CommandDispatcher.instance.execute_command command
   end
