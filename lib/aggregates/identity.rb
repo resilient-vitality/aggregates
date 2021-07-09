@@ -5,7 +5,7 @@ module Aggregates
   module Identity
     NAME = 'aggregates'
     LABEL = 'Aggregates'
-    VERSION = '0.1.0'
+    VERSION = '0.2.0'
     VERSION_LABEL = "#{LABEL} #{VERSION}"
   end
 end
