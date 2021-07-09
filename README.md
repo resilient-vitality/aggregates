@@ -19,6 +19,7 @@
     - [Creating Commands](#creating-commands)
     - [Creating Events](#creating-events)
     - [Processing Commands](#processing-commands)
+    - [Filtering Commands](#filtering-commands)
     - [Processing Events](#processing-events)
     - [Executing Commands](#executing-commands)
     - [Auditing Aggregates](#auditing-aggregates)
@@ -27,6 +28,7 @@
         - [Dynamoid](#dynamoid)
       - [Adding Command Processors](#adding-command-processors)
       - [Adding Event Processors](#adding-event-processors)
+      - [Adding Command Filters](#adding-command-filters)
   - [Development](#development)
   - [Tests](#tests)
   - [Versioning](#versioning)
@@ -68,7 +70,7 @@ class Post < Aggregates::AggregateRoot
   def publish(command)
     apply EventPublished, body: command.body, category: command.category
   end
-  
+
   # Before the event is processed, perform modifications to the aggregate.
   on EventPublished do |event|
     @body = event.body
@@ -83,7 +85,7 @@ end
 class PublishPost < Aggregates::Command
   attribute body, Types::String
   attribute category, Type::String
-  
+
   # Input Validation Handled via dry-validation.
   # Reference: https://dry-rb.org/gems/dry-validation/1.6/
   class Contract < Contract
@@ -116,11 +118,12 @@ end
 ```
 
 ### Filtering Commands
-There are times where commands should not be executed by the command logic. You can opt to include a 
+
+There are times where commands should not be executed by the command logic. You can opt to include a
 condition in your command processor. However, that is not always extensible if you have repeat logic. Additionally,
-depending on the complexity of your authorization logic, it can become hard to test. To support adding this filtering 
-logic, Aggregates supports `CommandFilters` to provide a simple API for filtering commands prior to a command processor 
-being called. 
+depending on the complexity of your authorization logic, it can become hard to test. To support adding this filtering
+logic, Aggregates supports `CommandFilters` to provide a simple API for filtering commands prior to a command processor
+being called.
 
 ```ruby
 class UpdatePostCommand < Aggregates::Commands
@@ -143,11 +146,8 @@ end
 In this example, we are using a super class of `UpdatePostBody`.
 As with all MessageProcessors, calling `on` with a super class
 will be called when any child class is being processed. In other words,
-`on UpdatePostCommand` will be called when you call `Aggregates.execute_command` 
+`on UpdatePostCommand` will be called when you call `Aggregates.execute_command`
 with an instance of `UpdatePostBody`.
-
-Calling `with_aggregate` in both the `CommandProcessor` and the `CommandFilter` is 
-
 
 ### Processing Events
 
@@ -156,7 +156,7 @@ class RssUpdateProcessor < Aggregates::EventProcessor
   def update_feed_for_new_post
     # ...
   end
-  
+
   on EventPublished do |event|
     update_feed_for_new_post(event)
   end
@@ -191,18 +191,19 @@ commands = auditor.commands # Or commands_processed_by(time) or commands_process
 aggregate_at_time = auditor.inspect_state_at(Time.now - 1.hour)
 ```
 
-### Configuring 
+### Configuring
 
 #### Storage Backends
 
-Storage Backends at the method by which events and commands are stored in 
-the system. 
+Storage Backends at the method by which events and commands are stored in
+the system.
 
 ```ruby
 Aggregates.configure do |config|
   config.store_with MyAwesomeStorageBackend.new
 end
 ```
+
 ##### Dynamoid
 
 If `Aggregates` can `require 'dynamoid'` then it will provide the `Aggregates::Dynamoid::DynamoidStorageBackend` that
@@ -217,7 +218,7 @@ Aggregates.configure do |config|
 end
 ```
 
-#### Adding Event Processors 
+#### Adding Event Processors
 
 ```ruby
 Aggregates.configure do |config|
