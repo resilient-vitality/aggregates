@@ -33,8 +33,8 @@ module Aggregates
     end
 
     def process_event(event)
-      super
       @sequence_number += 1
+      super
     end
 
     # Takes an event type and some parameters with which to create it. Then performs the following actions
@@ -46,8 +46,9 @@ module Aggregates
       raise FrozenError unless @mutable
 
       event = build_event(event, params)
-      process_event event
+      results = process_event event
       @event_stream.publish event
+      results
     end
 
     # Loads all events from the event stream of this instance and reprocesses them to
