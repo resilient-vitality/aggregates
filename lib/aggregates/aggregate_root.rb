@@ -4,11 +4,6 @@ module Aggregates
   # An AggregateRoot is a central grouping of domain object(s) that work to encapsulate
   # parts of our Domain or Business Logic.
   #
-  # Through out the documentation of this code, you will see reference to the CQRS Sequence that is
-  # executed through this library. As a reminder, it looks like this:
-  #
-  # Application Sends Command -> Command Processor -> AggregateRoot -> Event -> Event Processors -> Application
-  #
   # The general design of aggregate roots should be as follows:
   #   - Create functions that encapsulate different changes in your Aggregate Roots. These functions should enforce
   #   constraints on the application. Then capture state changes by creating events.

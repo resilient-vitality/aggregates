@@ -6,6 +6,8 @@
 
 A ruby gem for writing CQRS applications with pluggable components.
 
+_Warning:_ This Gem is in active development and probably doesn't work correctly. Tests are really light.
+
 [![Gem Version](https://badge.fury.io/rb/aggregates.svg)](http://badge.fury.io/rb/aggregates)
 [![Ruby Style Guide](https://img.shields.io/badge/code_style-community-brightgreen.svg)](https://rubystyle.guide)
 
@@ -50,7 +52,7 @@ A ruby gem for writing CQRS applications with pluggable components.
 
 ## Requirements
 
-1. [Ruby](https://www.ruby-lang.org)
+1. [Ruby 3.0+](https://www.ruby-lang.org)
 
 ## Setup
 
@@ -65,6 +67,14 @@ Or Add the following to your Gemfile:
 ## Usage
 
 ### Defining AggregateRoots
+
+An AggregateRoot is a central grouping of domain object(s) that work to encapsulate
+parts of your Domain or Business Logic. The general design of aggregate roots should be as follows:
+
+- Create functions that encapsulate different changes in your Aggregate Roots. These functions should enforce buisiness logic constraints and then capture state changes by creating events.
+- Create event handlers that actually perform the state changes captured by those events.
+
+A simple example is below:
 
 ```ruby
 class Post < Aggregates::AggregateRoot
@@ -83,6 +93,8 @@ end
 
 ### Creating Commands
 
+Commands are a type of domain message that define the shape and contract of data needed to perform an action. Essentially, they provide the api for interacting with your domain. Commands should have descriptive names capturing the change they are intended to make to the domain. For instance, `ChangeUserEmail` or `AddComment`.
+
 ```ruby
 class PublishPost < Aggregates::Command
   attribute body, Types::String
@@ -100,6 +112,10 @@ end
 
 ### Creating Events
 
+An Event describes something that happened. They are named in passed tense.
+For instance, if the user's email has changed, then you might create an event type called
+`UserEmailChanged`.
+
 ```ruby
 class PublishPost < Aggregates::Command
   attribute :body, Types::String
@@ -108,6 +124,13 @@ end
 ```
 
 ### Processing Commands
+
+The goal of a `CommandProcessor` is to route commands that have passed validation and
+filtering and invoke business logic on their respective aggregates. Doing so is accomplished
+by using the same Message handling DSL as in our `AggregateRoots`, this time for commands.
+
+We also provide a helper function `with_aggregate` that helps rerieve the appropriate aggregate
+for a given command.
 
 ```ruby
 class PostCommandProcessor < Aggregates::CommandProcessor
@@ -121,11 +144,7 @@ end
 
 ### Filtering Commands
 
-There are times where commands should not be executed by the command logic. You can opt to include a
-condition in your command processor. However, that is not always extensible if you have repeat logic. Additionally,
-depending on the complexity of your authorization logic, it can become hard to test. To support adding this filtering
-logic, Aggregates supports `CommandFilters` to provide a simple API for filtering commands prior to a command processor
-being called.
+There are times where commands should not be executed by the command logic. You can opt to include a condition in your command processor. However, that is not always extensible if you have repeat logic. Additionally, depending on the complexity of your authorization logic, it can become hard to test. To support adding this filtering logic, Aggregates supports `CommandFilters` to provide a simple API for filtering commands prior to a command processor being called.
 
 ```ruby
 class UpdatePostCommand < Aggregates::Command
