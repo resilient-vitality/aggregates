@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 class TestCommand < Aggregates::Command
-  attribute :allow, Aggregates::Types::Bool.default(true)
+  attr_accessor :allow
 end
 
 class TestProcessor < Aggregates::CommandFilter
@@ -13,12 +13,12 @@ end
 describe Aggregates::CommandFilter do
   it 'allows the command to be processed when there are zero processors' do
     instance = described_class.new
-    command = TestCommand.new(aggregate_id: Aggregates.new_aggregate_id)
+    command = TestCommand.new(aggregate_id: Aggregates.new_aggregate_id, allow: true)
     expect(instance.allow?(command)).to be true
   end
 
   it 'allows the command to be processed when every processor allows it' do
-    command = TestCommand.new(aggregate_id: Aggregates.new_aggregate_id)
+    command = TestCommand.new(aggregate_id: Aggregates.new_aggregate_id, allow: true)
     instance = TestProcessor.new
     expect(instance.allow?(command)).to be true
   end
