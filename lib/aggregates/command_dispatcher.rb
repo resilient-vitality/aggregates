@@ -15,7 +15,7 @@ module Aggregates
 
     # Takes a sequence of commands and executes them one at a time.
     def process_commands(*commands)
-      commands.each do |command|
+      commands.map do |command|
         process_command command
       end
     end
@@ -24,10 +24,11 @@ module Aggregates
     # processors and finally stored with the configured StorageBackend used for messages.
     def process_command(command)
       command.validate!
-      return unless should_process? command
+      return false unless should_process? command
 
       send_to_processors command
       store command
+      true
     end
 
     private

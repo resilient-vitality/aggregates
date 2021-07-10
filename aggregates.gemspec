@@ -25,7 +25,6 @@ Gem::Specification.new do |spec|
   spec.extra_rdoc_files = Dir['README*', 'LICENSE*']
   spec.require_paths = ['lib']
 
-  spec.add_dependency 'dry-struct', '~> 1.0'
-  spec.add_dependency 'dry-validation', '~> 1.6'
+  spec.add_dependency 'activemodel', '~> 6.1'
   spec.add_dependency 'zeitwerk', '~> 2.4'
 end

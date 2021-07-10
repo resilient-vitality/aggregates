@@ -96,22 +96,20 @@ as well. Every `on` block that applies to the event will be called in order from
 
 ### Creating Commands
 
-Commands are a type of domain message that define the shape and contract of data needed to perform an action. Essentially, they provide the api for interacting with your domain. Commands should have descriptive names capturing the change they are intended to make. For instance, `ChangeUserEmail` or `AddComment`.
+Commands are a type of domain message that define the shape and contract of data needed to perform an action. 
+Essentially, they provide the api for interacting with your domain. 
+Commands should have descriptive names capturing the change they are intended to make. 
+For instance, `ChangeUserEmail` or `AddComment`.
 
 ```ruby
 class PublishPost < Aggregates::Command
-  attribute :body, Types::String
-  attribute :category, Types::String
+  attr_accessor :body, :category
 
-  # Input Validation Handled via dry-validation.
-  # Reference: https://dry-rb.org/gems/dry-validation/1.6/
-  class Contract < Contract
-    rule(:body) do
-      key.failure('Post not long enough') unless value.length > 10
-    end
-  end
+  validates_length_of :body, minimum: 10
 end
 ```
+
+You can specify them via attr accessors and use `ActiveModel::Validations` to enforce data constraints. 
 
 ### Creating Events
 
@@ -121,8 +119,7 @@ For instance, if the user's email has changed, then you might create an event ty
 
 ```ruby
 class PublishPost < Aggregates::Command
-  attribute :body, Types::String
-  attribute :category, Types::String
+  attr_accessor :body, :category
 end
 ```
 
@@ -155,11 +152,11 @@ Instead, it is best to support this kind of filtering logic using `CommandFilter
 
 ```ruby
 class UpdatePostCommand < Aggregates::Command
-  attribute :commanding_user_id, Types::String
+  attr_accessor :commanding_user_id
 end
 
 class UpdatePostBody < UpdatePostCommand
-  attribute :body, Types::String
+  attr_accessor :body
 end
 
 class PostCommandFilter < Aggregates::CommandFilter
