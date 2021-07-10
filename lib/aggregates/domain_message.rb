@@ -12,6 +12,7 @@ module Aggregates
 
     def initialize(attributes = {})
       @created_at = Time.now
+      @message_id = Aggregates.new_message_id
       assign_attributes(attributes) if attributes
     end
 

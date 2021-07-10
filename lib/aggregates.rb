@@ -11,6 +11,10 @@ module Aggregates
     yield Configuration.instance
   end
 
+  def self.reset_configuration
+    Configuration.instance.reset
+  end
+
   def self.new_aggregate_id
     SecureRandom.uuid.to_s
   end
