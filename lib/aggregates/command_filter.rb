@@ -2,9 +2,10 @@
 
 module Aggregates
   # Applies filters to commands to decouple filtering logic from the CommandProcessor.
-  class CommandFilter
-    include MessageProcessor
-    include WithAggregateHelpers
+  class CommandFilter < CommandProcessor
+    class << self
+      alias filter on
+    end
 
     def allow?(command)
       handle_message(command).all?

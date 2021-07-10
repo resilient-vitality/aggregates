@@ -48,7 +48,7 @@ _Warning:_ This Gem is in active development and probably doesn't work correctly
 
 - Pluggable Event / Command Storage Backends
 - Tools for Command Validation, Filtering, and Execution.
-- Opinioned structure for CQRS, Domain-Driven Design, and Event Sourcing.
+- Opinionated structure for CQRS, Domain-Driven Design, and Event Sourcing.
 
 ## Requirements
 
@@ -71,7 +71,7 @@ Or Add the following to your Gemfile:
 An AggregateRoot is a grouping of domain object(s) that work to encapsulate
 a single part of your Domain or Business Logic. The general design of aggregate roots should be as follows:
 
-- Create functions that encapsulate different operations on your Aggregate Roots. These functions should enforce buisiness logic constraints and then capture state changes by creating events.
+- Create functions that encapsulate different operations on your Aggregate Roots. These functions should enforce business logic constraints and then capture state changes by creating events.
 - Create event handlers that actually perform the state changes captured by those events.
 
 A simple example is below:
@@ -103,8 +103,9 @@ For instance, `ChangeUserEmail` or `AddComment`.
 
 ```ruby
 class PublishPost < Aggregates::Command
+  interacts_with Post
+  
   attr_accessor :body, :category
-
   validates_length_of :body, minimum: 10
 end
 ```
@@ -118,7 +119,7 @@ For instance, if the user's email has changed, then you might create an event ty
 `UserEmailChanged`.
 
 ```ruby
-class PublishPost < Aggregates::Command
+class PublishPost < Aggregates::Event
   attr_accessor :body, :category
 end
 ```
@@ -128,30 +129,29 @@ end
 The goal of a `CommandProcessor` is to route commands that have passed validation and
 filtering. They should invoke business logic on their respective aggregates. Doing so is accomplished by using the same message-handling DSL as in our `AggregateRoots`, this time for commands.
 
-A helper function, `with_aggregate`, is provided to help retrieve the appropriate aggregate
-for a given command.
-
 ```ruby
 class PostCommandProcessor < Aggregates::CommandProcessor
-  on PublishPost do |command|
-    with_aggregate(Post, command) do |post|
-      post.publsh(command)
-    end
+  # Instead of `process`, you may use `on`
+  process PublishPost do |command, post|
+    post.publish(command)
   end
 end
 ```
 
-_Note:_ the message-handling DSL (`on`) supports passing a super class of any given event
-as well. Every `on` block that applies to the event will be called in order from most specific to least specific.
+_Note:_ the message-handling DSL (`process`) supports passing a super class of any given event
+as well. Every `process` block that applies to the event will be called in order from most specific to least specific.
 
 ### Filtering Commands
 
-There are times where commands should not be executed by the domain logic. You can opt to include a condition in your command processor or aggregate. However, that is not always extensible if you have repeated logic between many commands. Additionally, it violates the single responsiblity principal.
+There are times where commands should not be executed by the domain logic. You can opt to include a condition in your command processor or aggregate. However, that is not always extensible if you have repeated logic between many commands. Additionally, it violates the single responsibility principal.
 
-Instead, it is best to support this kind of filtering logic using `CommandFilters`. A `CommandFilter` uses the same Message Handling message-handling DSL as the rest of the `Aggregates` gem. This time, it needs to return a true/false back to the gem to determine whether or not (true/false) the command should be allowed. Many command filters can provide many blocks of the `on` DSL. If any one of the filters rejects the command then the command will not be procesed.
+Instead, it is best to support this kind of filtering logic using `CommandFilters`. A `CommandFilter` uses the same Message Handling message-handling DSL as the rest of the `Aggregates` gem. 
+This time, it needs to return a true/false back to the gem to determine whether or not (true/false) the command should be allowed. Many command filters can provide many blocks of the `filter` or `on` DSL. 
+If any one of the filters rejects the command then the command will not be processed.
 
 ```ruby
 class UpdatePostCommand < Aggregates::Command
+  interacts_with Post
   attr_accessor :commanding_user_id
 end
 
@@ -160,16 +160,15 @@ class UpdatePostBody < UpdatePostCommand
 end
 
 class PostCommandFilter < Aggregates::CommandFilter
-  on UpdatePostCommand do |command|
-    with_aggregate(Post, command) do |post|
-      post.owner_id == command.commanding_user_id
-    end
+  # Instead of `filter`, you may use `on`
+  filter UpdatePostCommand do |command, post|
+    post.owner_id == command.commanding_user_id
   end
 end
 ```
 
 In this example, we are using a super class of `UpdatePostBody`.
-As with all MessageProcessors, calling `on` with a super class
+As with all MessageProcessors, calling `filter` with a super class
 will be called when any child class is being processed. In other words,
 `on UpdatePostCommand` will be called when you call `Aggregates.execute_command`
 with an instance of `UpdatePostBody`.
