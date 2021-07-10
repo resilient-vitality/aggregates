@@ -8,7 +8,7 @@ module Aggregates
     end
 
     def allow?(command)
-      handle_message(command).all?
+      process_command(command).all?
     end
   end
 end
