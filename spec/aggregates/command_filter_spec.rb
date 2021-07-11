@@ -7,7 +7,9 @@ class TestCommand < Aggregates::Command
 end
 
 class TestProcessor < Aggregates::CommandFilter
-  on TestCommand, &:allow
+  on TestCommand do |command, _aggregate|
+    command.allow
+  end
 end
 
 describe Aggregates::CommandFilter do

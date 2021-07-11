@@ -24,7 +24,7 @@ class CommandDispatcherTestFilter < Aggregates::CommandFilter
     @allow = allow
   end
 
-  on Aggregates::Command do |_command|
+  filter Aggregates::Command do |_command, _aggregate|
     @allow
   end
 end
@@ -32,7 +32,7 @@ end
 class CommandDispatcherTestProcessor < Aggregates::CommandProcessor
   attr_reader :called
 
-  on Aggregates::Command do |_command|
+  process Aggregates::Command do |_command, _aggregate|
     @called = true
   end
 end

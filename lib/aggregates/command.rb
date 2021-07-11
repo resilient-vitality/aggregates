@@ -23,7 +23,13 @@ module Aggregates
     end
 
     def related_aggregate
-      @related_aggregate ||= aggregate_type.get_by_id aggregate_id
+      @related_aggregate ||= find_related_aggregate
+    end
+
+    private
+
+    def find_related_aggregate
+      self.class.aggregate_type&.get_by_id aggregate_id
     end
   end
 end
