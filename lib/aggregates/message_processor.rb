@@ -36,12 +36,16 @@ module Aggregates
       end
     end
 
-    def handle_message(message)
+    def invoke_handlers(message, *additional_args)
       results = []
       with_message_handlers(message) do |handler|
-        results << instance_exec(message, &handler)
+        results << instance_exec(message, *additional_args, &handler)
       end
       results
+    end
+
+    def handle_message(message)
+      invoke_handlers(message)
     end
   end
 end
