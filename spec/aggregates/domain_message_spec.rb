@@ -14,7 +14,7 @@ describe Aggregates::DomainMessage do
   end
 
   context 'when handling JSON' do
-    it 'it serializes and deserializes back to an equivalent object' do
+    it 'serializes and deserializes back to an equivalent object' do
       # TODO
     end
   end

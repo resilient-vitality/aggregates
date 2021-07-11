@@ -12,7 +12,10 @@ module Aggregates
                 :storage_backend, :command_filters
 
     def initialize
-      reset
+      @command_processors = []
+      @event_processors = []
+      @command_filters = []
+      @storage_backend = InMemoryStorageBackend.new
     end
 
     def store_with(storage_backend)
@@ -38,10 +41,7 @@ module Aggregates
     end
 
     def reset
-      @command_processors = []
-      @event_processors = []
-      @command_filters = []
-      @storage_backend = InMemoryStorageBackend.new
+      initialize
     end
   end
 end

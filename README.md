@@ -104,8 +104,8 @@ For instance, `ChangeUserEmail` or `AddComment`.
 ```ruby
 class PublishPost < Aggregates::Command
   interacts_with Post
-  
-  attr_accessor :body, :category
+
+  field :body, :category
   validates_length_of :body, minimum: 10
 end
 ```
@@ -120,7 +120,7 @@ For instance, if the user's email has changed, then you might create an event ty
 
 ```ruby
 class PublishPost < Aggregates::Event
-  attr_accessor :body, :category
+  field :body, :category
 end
 ```
 
@@ -152,11 +152,11 @@ If any one of the filters rejects the command then the command will not be proce
 ```ruby
 class UpdatePostCommand < Aggregates::Command
   interacts_with Post
-  attr_accessor :commanding_user_id
+  field :commanding_user_id
 end
 
 class UpdatePostBody < UpdatePostCommand
-  attr_accessor :body
+  field :body
 end
 
 class PostCommandFilter < Aggregates::CommandFilter

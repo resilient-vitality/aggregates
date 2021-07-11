@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 class TestCommand < Aggregates::Command
-  attr_accessor :allow
+  field :allow
 end
 
 class TestProcessor < Aggregates::CommandFilter

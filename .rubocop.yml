@@ -1,0 +1,9 @@
+require:
+  - rubocop-performance
+  - rubocop-rake
+  - rubocop-rspec
+
+Metrics/BlockLength:
+  IgnoredMethods: ['describe', 'context']
+RSpec/RepeatedExample:
+  Enabled: false

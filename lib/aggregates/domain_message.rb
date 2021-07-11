@@ -29,7 +29,11 @@ module Aggregates
       new arguments
     end
 
-    attr_accessor :aggregate_id, :message_id, :created_at
+    def self.field(*fields)
+      attr_accessor(*fields)
+    end
+
+    field :aggregate_id, :message_id, :created_at
 
     validates_presence_of :aggregate_id, :message_id, :created_at
   end

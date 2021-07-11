@@ -2,8 +2,10 @@
 
 require 'spec_helper'
 
+VALID_ID = Aggregates.new_aggregate_id
+
 class CommandDispatcherTestCommand < Aggregates::Command
-  attr_accessor :body
+  field :body
 
   validates_length_of :body, minimum: 10
 
@@ -13,7 +15,7 @@ class CommandDispatcherTestCommand < Aggregates::Command
   end
 
   def self.valid
-    args = { aggregate_id: Aggregates.new_aggregate_id, body: 'shortlonglonger' }
+    args = { aggregate_id: VALID_ID, body: 'shortlonglonger' }
     new args
   end
 end
@@ -37,7 +39,21 @@ class CommandDispatcherTestProcessor < Aggregates::CommandProcessor
   end
 end
 
+def process_valid_command
+  command = CommandDispatcherTestCommand.valid
+  described_class.instance.process_command(command)
+end
+
 describe Aggregates::CommandDispatcher do
+  processor_one = CommandDispatcherTestProcessor.new
+  processor_two = CommandDispatcherTestProcessor.new
+
+  before do
+    Aggregates.configure do |config|
+      config.process_commands_with processor_one, processor_two
+    end
+  end
+
   context 'when validating a command' do
     it 'raises an error if the command is invalid' do
       command = CommandDispatcherTestCommand.invalid
@@ -47,41 +63,33 @@ describe Aggregates::CommandDispatcher do
 
   context 'when checking if the command should be processed' do
     it 'returns false if it should not be processed' do
-      command = CommandDispatcherTestCommand.valid
       Aggregates.configure do |config|
         config.filter_commands_with CommandDispatcherTestFilter.new(false)
       end
-      result = described_class.instance.process_command(command)
+      result = process_valid_command
       expect(result).to be false
     end
   end
 
-  context 'When executing an accepted command' do
+  context 'when executing an accepted command' do
     it 'sends the command to all command processors' do
-      processor_one = CommandDispatcherTestProcessor.new
-      processor_two = CommandDispatcherTestProcessor.new
-      Aggregates.configure do |config|
-        config.process_commands_with processor_one, processor_two
-      end
-      described_class.instance.process_command(CommandDispatcherTestCommand.valid)
-      expect(processor_one.called).to be true
-      expect(processor_two.called).to be true
+      process_valid_command
+      results = [processor_one.called, processor_two.called]
+      expect(results.all?).to be true
     end
 
     it 'sends the command to the storage backend' do
-      command = CommandDispatcherTestCommand.valid
-      described_class.instance.process_command(command)
+      process_valid_command
       storage_backend = Aggregates::Configuration.instance.storage_backend
-      stored_commands = storage_backend.load_commands_by_aggregate_id(command.aggregate_id)
-      expect(stored_commands).to contain_exactly(command)
+      stored_commands = storage_backend.load_commands_by_aggregate_id(VALID_ID)
+      expect(stored_commands.length).to be 1
     end
 
     it 'returns true' do
-      command = CommandDispatcherTestCommand.valid
       Aggregates.configure do |config|
         config.filter_commands_with CommandDispatcherTestFilter.new(true)
       end
-      result = described_class.instance.process_command(command)
+      result = process_valid_command
       expect(result).to be true
     end
   end

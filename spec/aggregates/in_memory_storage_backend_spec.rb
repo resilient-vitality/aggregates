@@ -9,7 +9,7 @@ describe Aggregates::InMemoryStorageBackend do
     end
   end
 
-  context 'When adding new commands to the store' do
+  context 'when adding new commands to the store' do
     it 'is stored for later retrieval' do
       # TODO
     end
