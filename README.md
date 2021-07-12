@@ -80,11 +80,11 @@ A simple example is below:
 class Post < Aggregates::AggregateRoot
   # Write functions that encapsulate business logic.
   def publish(command)
-    apply EventPublished, body: command.body, category: command.category
+    apply PostPublished, body: command.body, category: command.category
   end
 
   # Modify the state of the aggregate from the emitted events.
-  on EventPublished do |event|
+  on PostPublished do |event|
     @body = event.body
     @category = event.category
   end
@@ -119,7 +119,7 @@ For instance, if the user's email has changed, then you might create an event ty
 `UserEmailChanged`.
 
 ```ruby
-class PublishPost < Aggregates::Event
+class PostPublished < Aggregates::Event
   field :body, :category
 end
 ```
@@ -187,7 +187,7 @@ class RssUpdateProcessor < Aggregates::EventProcessor
     # ...
   end
 
-  on EventPublished do |event|
+  on PostPublished do |event|
     update_feed_for_new_post(event)
   end
 end
