@@ -18,8 +18,8 @@ module Aggregates
     end
 
     def store_event(event)
-      event_for_aggregate_id = load_events_by_aggregate_id(event.aggregate_id)
-      event_for_aggregate_id << event
+      events_for_aggregate_id = load_events_by_aggregate_id(event.aggregate_id)
+      events_for_aggregate_id << event
     end
 
     def load_events_by_aggregate_id(aggregate_id)
