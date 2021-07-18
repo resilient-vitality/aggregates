@@ -23,6 +23,7 @@ _Warning:_ This Gem is in active development and probably doesn't work correctly
     - [Creating Commands](#creating-commands)
     - [Creating Events](#creating-events)
     - [Processing Commands](#processing-commands)
+    - [Value Objects](#value-objects)
     - [Filtering Commands](#filtering-commands)
     - [Processing Events](#processing-events)
     - [Executing Commands](#executing-commands)
@@ -137,9 +138,22 @@ class PostCommandProcessor < Aggregates::CommandProcessor
   end
 end
 ```
-
 _Note:_ the message-handling DSL (`process`) supports passing a super class of any given event
 as well. Every `process` block that applies to the event will be called in order from most specific to least specific.
+
+### Value Objects
+
+Often times you will find that you will have data clumps that are similar pieces of data that have the same rules, and schema. Typically these values represent a valid type in your domain and should be combined as a single value. That is where `ValueObject` comes in. The api is the same as commands and events.
+
+```ruby
+class Name < Aggregates::ValueObject
+  field :first_name, :last_name
+  validates_presence_of :first_name, :last_name
+end
+```
+
+When you have a command, validation logic will automatically include validating nested value objects to an arbitrary depth.
+
 
 ### Filtering Commands
 
