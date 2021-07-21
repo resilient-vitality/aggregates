@@ -7,8 +7,8 @@ module Aggregates
       alias filter on
     end
 
-    def allow?(command)
-      process_command(command).all?
+    def allow?(execution)
+      process(execution).all?
     end
   end
 end

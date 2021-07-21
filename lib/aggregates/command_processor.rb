@@ -9,9 +9,8 @@ module Aggregates
       alias process on
     end
 
-    def process_command(command)
-      aggregate = command.related_aggregate
-      invoke_handlers(command, aggregate)
+    def process(execution)
+      execution.execute_with(self)
     end
   end
 end

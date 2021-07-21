@@ -4,8 +4,6 @@ source 'https://rubygems.org'
 
 gemspec
 
-gem 'dynamoid'
-
 group :code_quality do
   gem 'bundler-audit', '~> 0.7'
   gem 'git-lint', '~> 2.0'

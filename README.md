@@ -26,14 +26,11 @@ _Warning:_ This Gem is in active development and probably doesn't work correctly
     - [Value Objects](#value-objects)
     - [Filtering Commands](#filtering-commands)
     - [Processing Events](#processing-events)
-    - [Executing Commands](#executing-commands)
-    - [Auditing Aggregates](#auditing-aggregates)
-    - [Configuring](#configuring)
+    - [Building The Domain](#building-the-domain)
+    - [Executing Your Domain](#executing-your-domain)
       - [Storage Backends](#storage-backends)
-        - [Dynamoid](#dynamoid)
-      - [Adding Command Processors](#adding-command-processors)
-      - [Adding Event Processors](#adding-event-processors)
-      - [Adding Command Filters](#adding-command-filters)
+      - [Executing Commands](#executing-commands)
+      - [Auditing Aggregates](#auditing-aggregates)
   - [Development](#development)
   - [Tests](#tests)
   - [Versioning](#versioning)
@@ -106,7 +103,8 @@ For instance, `ChangeUserEmail` or `AddComment`.
 class PublishPost < Aggregates::Command
   interacts_with Post
 
-  field :body, :category
+  attribute :body
+  attribute :category
   validates_length_of :body, minimum: 10
 end
 ```
@@ -121,7 +119,8 @@ For instance, if the user's email has changed, then you might create an event ty
 
 ```ruby
 class PostPublished < Aggregates::Event
-  field :body, :category
+  attribute :body
+  attribute :category
 end
 ```
 
@@ -147,7 +146,8 @@ Often times you will find that you will have data clumps that are similar pieces
 
 ```ruby
 class Name < Aggregates::ValueObject
-  field :first_name, :last_name
+  attribute :first_name
+  attribute :last_name
   validates_presence_of :first_name, :last_name
 end
 ```
@@ -207,27 +207,49 @@ class RssUpdateProcessor < Aggregates::EventProcessor
 end
 ```
 
-_Note:_ the message-handling DSL (`on`) supports passing a super class of any given event
-as well. Every `on` block that applies to the event will be called in order from most specific to least specific.
+### Building The Domain
 
-### Executing Commands
+```ruby
+domain = Aggregates.create_domain do
+  # Adding Command Processors
+  process_commands_with PostCommandProcessor.new
+  # Adding Event Processors
+  process_events_with RssUpdateProcessor.new
+  # Adding Command Filters
+  filter_commands_with MyCommandFilter.new
+end
+```
+
+### Executing Your Domain
+
+#### Storage Backends
+
+Storage Backends are the method by which events and commands are stored in
+the system. You need to specify one in order to execute your domain.
+
+```ruby
+executor = domain.execute_with MyAwesomeStorageBackend.new
+```
+
+#### Executing Commands
 
 ```ruby
 aggregate_id = Aggregates.new_aggregate_id
 command = CreateThing.new(foo: 1, bar: false, aggregate_id: aggregate_id)
-Aggregates.execute_command command
+executor.execute_command(command)
 
 increment = IncrementFooThing.new(aggregate_id: aggregate_id)
 toggle = ToggleBarThing.new(aggregate_id: aggregate_id)
-Aggregates.execute_commands increment, toggle
+executor.execute_command(command)
+executor.execute_command(command)
 ```
 
-### Auditing Aggregates
+#### Auditing Aggregates
 
 ```ruby
 aggregate_id = Aggregates.new_aggregate_id
 # ... Commands and stuff happened.
-auditor = Aggregates.audit MyAggregateType aggregate_id
+auditor = executor.audit MyAggregateType aggregate_id
 
 # Each of these returns a list to investigate using.
 events = auditor.events # Or events_processed_by(time) or events_processed_after(time)
@@ -238,49 +260,6 @@ commands = auditor.commands # Or commands_processed_by(time) or commands_process
 aggregate_at_time = auditor.inspect_state_at(Time.now - 1.hour)
 ```
 
-### Configuring
-
-#### Storage Backends
-
-Storage Backends at the method by which events and commands are stored in
-the system.
-
-```ruby
-Aggregates.configure do |config|
-  config.store_with MyAwesomeStorageBackend.new
-end
-```
-
-##### Dynamoid
-
-If `Aggregates` can `require 'dynamoid'` then it will provide the `Aggregates::Dynamoid::DynamoidStorageBackend` that
-stores using the [Dynmoid Gem](https://github.com/Dynamoid/dynamoid) for AWS DynamoDB.
-
-#### Adding Command Processors
-
-```ruby
-Aggregates.configure do |config|
-  # May call this method many times with different processors.
-  config.process_commands_with PostCommandProcessor.new
-end
-```
-
-#### Adding Event Processors
-
-```ruby
-Aggregates.configure do |config|
-  # May call this method many times with different processors.
-  config.process_events_with RssUpdateProcessor.new
-end
-```
-
-#### Adding Command Filters
-
-```ruby
-Aggregates.configure do |config|
-  config.filter_commands_with MyCommandFilter.new
-end
-```
 
 ## Development
 

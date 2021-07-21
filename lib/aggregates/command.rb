@@ -23,14 +23,8 @@ module Aggregates
       raise Aggregates::CommandValidationError, errors.as_json
     end
 
-    def related_aggregate
-      @related_aggregate ||= find_related_aggregate
-    end
-
-    private
-
-    def find_related_aggregate
-      self.class.aggregate_type&.get_by_id aggregate_id
+    def load_related_aggregate(aggregate_repo)
+      aggregate_repo.load_aggregate(self.class.aggregate_type, aggregate_id)
     end
   end
 end

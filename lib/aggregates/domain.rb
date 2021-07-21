@@ -1,25 +1,18 @@
 # frozen_string_literal: true
 
-require 'singleton'
+require_relative './command_dispatcher'
+require_relative './domain_executor'
 
 module Aggregates
-  # Stores all of the items needed to dictate the exact behavior needed by
-  # the application consuming the Aggregates gem.
-  class Configuration
-    include Singleton
-
-    attr_reader :command_processors, :event_processors,
-                :storage_backend, :command_filters
+  # Defines the collection of command processors, event processors, and command filters
+  # that are executed together.
+  class Domain
+    attr_reader :command_processors, :event_processors, :command_filters
 
     def initialize
       @command_processors = []
       @event_processors = []
       @command_filters = []
-      @storage_backend = InMemoryStorageBackend.new
-    end
-
-    def store_with(storage_backend)
-      @storage_backend = storage_backend
     end
 
     def process_events_with(*event_processors)
@@ -40,8 +33,8 @@ module Aggregates
       end
     end
 
-    def reset
-      initialize
+    def execute_with(storage_backend)
+      DomainExecutor.new(storage_backend, self)
     end
   end
 end

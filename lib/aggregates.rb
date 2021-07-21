@@ -1,37 +1,44 @@
 # frozen_string_literal: true
 
-require 'zeitwerk'
+require 'securerandom'
 
-loader = Zeitwerk::Loader.for_gem
-loader.setup
+require_relative './aggregates/domain_object'
+require_relative './aggregates/domain_message'
+require_relative './aggregates/message_processor'
+
+require_relative './aggregates/aggregate_root'
+require_relative './aggregates/auditor'
+require_relative './aggregates/command'
+require_relative './aggregates/command_processor'
+require_relative './aggregates/command_filter'
+require_relative './aggregates/command_validation_error'
+require_relative './aggregates/domain'
+require_relative './aggregates/domain_executor'
+require_relative './aggregates/event'
+require_relative './aggregates/event_processor'
+require_relative './aggregates/event_stream'
+require_relative './aggregates/value_object'
+
+require_relative './aggregates/storage_backend'
+require_relative './aggregates/in_memory_storage_backend'
 
 # A helpful library for building CQRS and Event Sourced Applications.
 module Aggregates
-  def self.configure
-    yield Configuration.instance
-  end
-
-  def self.reset_configuration
-    Configuration.instance.reset
-  end
-
   def self.new_aggregate_id
-    SecureRandom.uuid.to_s
+    new_uuid
   end
 
   def self.new_message_id
+    new_uuid
+  end
+
+  def self.create_domain(&block)
+    domain = Domain.new
+    domain.instance_exec(&block)
+    domain
+  end
+
+  def self.new_uuid
     SecureRandom.uuid.to_s
-  end
-
-  def self.execute_command(command)
-    CommandDispatcher.instance.execute_command command
-  end
-
-  def self.execute_commands(*commands)
-    CommandDispatcher.instance.execute_commands(*commands)
-  end
-
-  def self.audit(type, aggregate_id)
-    Auditor.new type, aggregate_id
   end
 end

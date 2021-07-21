@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative './message_processor'
+
 module Aggregates
   # An AggregateRoot is a central grouping of domain object(s) that work to encapsulate
   # parts of our Domain or Business Logic.
@@ -10,31 +12,23 @@ module Aggregates
   #
   #   - Create event handlers that actually performed the state changes captured by the events
   #     made by processing commands using the above functions.
-  class AggregateRoot < EventProcessor
-    attr_reader :id
+  class AggregateRoot
+    include MessageProcessor
 
-    # Returns a new instance of an aggregate by loading and reprocessing all events for that aggregate.
-    def self.get_by_id(id)
-      instance = new id
-      instance.replay_history
-      instance
-    end
+    attr_reader :id
 
     # Creates a new instance of an aggregate root. This should not be called directly. Instead, it should
     # be called by calling AggregateRoot.get_by_id.
     # :reek:BooleanParameter
-    def initialize(id, mutable: true)
-      super()
-
+    def initialize(id, event_stream)
       @id = id
-      @mutable = mutable
       @sequence_number = 1
-      @event_stream = EventStream.new id
+      @event_stream = event_stream
     end
 
     def process_event(event)
       @sequence_number += 1
-      super
+      handle_message event
     end
 
     # Takes an event type and some parameters with which to create it. Then performs the following actions
@@ -43,22 +37,10 @@ module Aggregates
     #   3.) Produces the event on the event stream so that is saved by the storage backend and processed
     #       by the configured processors of the given type.
     def apply(event, params = {})
-      raise FrozenError unless @mutable
-
       event = build_event(event, params)
-      results = process_event event
-      @event_stream.publish event
+      results = process_event(event)
+      @event_stream.publish(event)
       results
-    end
-
-    # Loads all events from the event stream of this instance and reprocesses them to
-    # get the current state of the aggregate.
-    def replay_history(up_to: nil)
-      events = @event_stream.load_events
-      events = events.select { |event| event.created_at <= up_to } if up_to.present?
-      events.each do |event|
-        process_event event
-      end
     end
 
     private

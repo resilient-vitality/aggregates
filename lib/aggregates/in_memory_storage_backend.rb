@@ -13,13 +13,11 @@ module Aggregates
     end
 
     def store_command(command)
-      commands_for_aggregate_id = load_commands_by_aggregate_id(command.aggregate_id)
-      commands_for_aggregate_id << command
+      load_commands_by_aggregate_id(command.aggregate_id) << command
     end
 
     def store_event(event)
-      events_for_aggregate_id = load_events_by_aggregate_id(event.aggregate_id)
-      events_for_aggregate_id << event
+      load_events_by_aggregate_id(event.aggregate_id) << event
     end
 
     def load_events_by_aggregate_id(aggregate_id)

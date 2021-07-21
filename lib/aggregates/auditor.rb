@@ -6,7 +6,8 @@ module Aggregates
   class Auditor
     attr_reader :type, :aggregate_id
 
-    def initialize(type, aggregate_id)
+    def initialize(storage_backend, type, aggregate_id)
+      @storage_backend = storage_backend
       @type = type
       @aggregate_id = aggregate_id
     end
@@ -15,19 +16,18 @@ module Aggregates
     # on the aggregate alone. Only events that happened prior to the time specified are
     # processed.
     def inspect_state_at(time)
-      aggregate = @type.new @aggregate_id, mutable: false
-      aggregate.replay_history up_to: time
-      aggregate
+      aggregate_repository = AggregateRepository.new(@storage_backend)
+      aggregate_repository.load_aggregate(@type, @aggregate_id, at: time)
     end
 
     # Returns all stored events for a given aggregate.
     def events
-      @events ||= Configuration.storage_backend.load_events_by_aggregate_id(@aggregate_id)
+      @events ||= @storage_backend.load_events_by_aggregate_id(@aggregate_id)
     end
 
     # Returns all commands for a given aggregate.
     def commands
-      @commands ||= Configuration.storage_backend.load_commands_by_aggregate_id(@aggregate_id)
+      @commands ||= @storage_backend.load_commands_by_aggregate_id(@aggregate_id)
     end
 
     def events_processed_by(time)

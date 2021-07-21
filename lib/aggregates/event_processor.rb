@@ -7,9 +7,6 @@ module Aggregates
   # for your application.
   class EventProcessor
     include MessageProcessor
-
-    def process_event(event)
-      handle_message event
-    end
+    alias process_event handle_message
   end
 end

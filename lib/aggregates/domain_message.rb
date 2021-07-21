@@ -6,12 +6,12 @@ module Aggregates
   # (Event and Command) both require.
   class DomainMessage < DomainObject
     def initialize(attributes = {})
-      super
-      @created_at = Time.now
-      @message_id = Aggregates.new_message_id
+      super(attributes.merge({ message_id: Aggregates.new_message_id, created_at: Time.now }))
     end
 
-    field :aggregate_id, :message_id, :created_at
+    attribute :aggregate_id
+    attribute :message_id
+    attribute :created_at
     validates_presence_of :aggregate_id, :message_id, :created_at
   end
 end

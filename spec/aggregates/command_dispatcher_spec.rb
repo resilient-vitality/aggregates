@@ -5,7 +5,10 @@ require 'spec_helper'
 VALID_ID = Aggregates.new_aggregate_id
 
 class CommandDispatcherTestCommand < Aggregates::Command
-  field :body
+  interacts_with Aggregates::AggregateRoot
+
+  attribute :body
+  attribute :filter
 
   validates_length_of :body, minimum: 10
 
@@ -14,20 +17,15 @@ class CommandDispatcherTestCommand < Aggregates::Command
     new args
   end
 
-  def self.valid
-    args = { aggregate_id: VALID_ID, body: 'shortlonglonger' }
+  def self.valid(filter)
+    args = { aggregate_id: VALID_ID, body: 'shortlonglonger', filter: filter }
     new args
   end
 end
 
 class CommandDispatcherTestFilter < Aggregates::CommandFilter
-  def initialize(allow)
-    super()
-    @allow = allow
-  end
-
-  filter Aggregates::Command do |_command, _aggregate|
-    @allow
+  filter Aggregates::Command do |command, _aggregate|
+    !command.filter
   end
 end
 
@@ -39,34 +37,40 @@ class CommandDispatcherTestProcessor < Aggregates::CommandProcessor
   end
 end
 
-def process_valid_command
-  command = CommandDispatcherTestCommand.valid
-  described_class.instance.process_command(command)
-end
-
 describe Aggregates::CommandDispatcher do
-  processor_one = CommandDispatcherTestProcessor.new
-  processor_two = CommandDispatcherTestProcessor.new
+  let(:processor_one) { CommandDispatcherTestProcessor.new }
+  let(:processor_two) { CommandDispatcherTestProcessor.new }
+  let(:filterer) { CommandDispatcherTestFilter.new }
 
-  before do
-    Aggregates.configure do |config|
-      config.process_commands_with processor_one, processor_two
+  let(:domain) do
+    one = processor_one
+    two = processor_two
+    filter = filterer
+    Aggregates.create_domain do
+      process_commands_with one, two
+      filter_commands_with filter
     end
+  end
+
+  let(:executor) do
+    domain.execute_with(Aggregates::InMemoryStorageBackend.new)
+  end
+
+  def process_valid_command(filter: false)
+    command = CommandDispatcherTestCommand.valid(filter)
+    executor.execute_command(command)
   end
 
   context 'when validating a command' do
     it 'raises an error if the command is invalid' do
       command = CommandDispatcherTestCommand.invalid
-      expect { described_class.instance.process_command(command) }.to raise_exception Aggregates::CommandValidationError
+      expect { executor.execute_command(command) }.to raise_exception Aggregates::CommandValidationError
     end
   end
 
   context 'when checking if the command should be processed' do
     it 'returns false if it should not be processed' do
-      Aggregates.configure do |config|
-        config.filter_commands_with CommandDispatcherTestFilter.new(false)
-      end
-      result = process_valid_command
+      result = process_valid_command(filter: true)
       expect(result).to be false
     end
   end
@@ -80,15 +84,11 @@ describe Aggregates::CommandDispatcher do
 
     it 'sends the command to the storage backend' do
       process_valid_command
-      storage_backend = Aggregates::Configuration.instance.storage_backend
-      stored_commands = storage_backend.load_commands_by_aggregate_id(VALID_ID)
+      stored_commands = executor.storage_backend.load_commands_by_aggregate_id(VALID_ID)
       expect(stored_commands.length).to be 1
     end
 
     it 'returns true' do
-      Aggregates.configure do |config|
-        config.filter_commands_with CommandDispatcherTestFilter.new(true)
-      end
       result = process_valid_command
       expect(result).to be true
     end

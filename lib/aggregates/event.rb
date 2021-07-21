@@ -6,8 +6,7 @@ module Aggregates
   # For instance, if the user's email has changed, then you might create an event type called
   # UserEmailChanged.
   class Event < DomainMessage
-    field :sequence_number
-
+    attribute :sequence_number
     validates_presence_of :sequence_number
   end
 end

@@ -3,19 +3,13 @@
 require 'active_model'
 
 module Aggregates
+  # Defines an object that is an element of the domain.
   class DomainObject
-    include ActiveModel::AttributeAssignment
+    include ActiveModel::Model
     include ActiveModel::Validations
+    include ActiveModel::Attributes
 
     validate :validate_nested_fields
-
-    def initialize(attributes = {})
-      assign_attributes(attributes) if attributes
-    end
-
-    def attributes
-      as_json
-    end
 
     def to_json(*args)
       json_data = attributes.merge({ JSON.create_id => self.class.name })
@@ -23,18 +17,15 @@ module Aggregates
     end
 
     def self.json_create(arguments)
-      new arguments
-    end
-
-    def self.field(*fields)
-      attr_accessor(*fields)
+      new(**arguments)
     end
 
     protected
 
     def add_nested_errors_for(attribute, other_validator)
-      errors.messages[attribute] = other_validator.errors.messages
-      errors.details[attribute]  = other_validator.errors.details
+      nested_errors = other_validator.errors
+      errors.messages[attribute] = nested_errors.messages
+      errors.details[attribute]  = nested_errors.details
     end
 
     def validate_nested_fields
