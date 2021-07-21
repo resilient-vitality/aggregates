@@ -166,11 +166,11 @@ If any one of the filters rejects the command then the command will not be proce
 ```ruby
 class UpdatePostCommand < Aggregates::Command
   interacts_with Post
-  field :commanding_user_id
+  attribute :commanding_user_id
 end
 
 class UpdatePostBody < UpdatePostCommand
-  field :body
+  attribute :body
 end
 
 class PostCommandFilter < Aggregates::CommandFilter
